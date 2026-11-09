@@ -60,25 +60,17 @@
     titulo.textContent = 'Abrindo o ' + a.nome + '...';
     btnApp.href = a.link; btnApp.textContent = 'Abrir o ' + a.nome;
     btnWeb.href = a.web;
+    msg.innerHTML = 'Se o Chrome perguntar, marque <strong>Sempre permitir</strong> e clique em <strong>Abrir ' + a.nome +
+                    '</strong>. Depois pode fechar esta aba.';
 
-    // Quando o aplicativo abre, a janela do Chrome perde o foco: ai a aba ja pode fechar.
-    var abriu = false;
-    function fechar() {
-      if (abriu) return; abriu = true;
-      titulo.textContent = a.nome + ' aberto';
-      msg.textContent = 'Pode fechar esta aba.';
-      btnWeb.classList.remove('oculto');
-      setTimeout(function () { window.close(); }, 800);
-    }
-    window.addEventListener('blur', fechar);
-    document.addEventListener('visibilitychange', function () { if (document.hidden) fechar(); });
-
+    // 09/11/2026: a pagina nao tenta adivinhar se o aplicativo abriu. A pergunta do Chrome
+    // ("Abrir ...?") tambem tira o foco da pagina, entao "perdeu o foco" nao prova nada.
     location.href = a.link;
 
-    // Sem resposta em 6 s: o aplicativo talvez nao esteja instalado neste PC.
+    // Depois de 6 s mostra a versao web, para quem nao tem o aplicativo instalado.
     setTimeout(function () {
-      if (abriu) return;
-      msg.textContent = 'Não abriu? O aplicativo pode não estar instalado neste computador. Você pode usar a versão no navegador.';
+      msg.innerHTML = 'Se o Chrome perguntar, marque <strong>Sempre permitir</strong> e clique em <strong>Abrir ' + a.nome +
+                      '</strong>. Se o aplicativo não estiver instalado neste computador, use a versão no navegador.';
       btnWeb.classList.remove('oculto');
     }, 6000);
   }
