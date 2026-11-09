@@ -1,0 +1,87 @@
+<!doctype html>
+<!--
+  Central FME - abre o aplicativo instalado no PC (09/11/2026).
+  O SharePoint so aceita links http/https nos botoes; esta pagina recebe ?app=claude|chatgpt|outlook,
+  chama o link do aplicativo (claude://, codex://, fme-outlook:) e fecha a aba.
+  Se o aplicativo nao abrir, oferece a versao web.
+  fme-outlook: so existe nos PCs onde rodou CENTRAL_FME_SHAREPOINT\abrir_central_ao_iniciar.ps1.
+  Pagina publica: nao colocar aqui nenhum dado da Fundacao.
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Abrindo aplicativo - Central FME</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --azul: #002F6C; --dourado: #CFB46A; --texto: #1F2A44; --fundo: #F5F7FA; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+         background: var(--fundo); color: var(--texto); font-family: Montserrat, "Segoe UI", sans-serif; padding: 16px; }
+  .cartao { background: #fff; border-top: 4px solid var(--dourado); border-radius: 10px; padding: 32px 28px;
+            max-width: 420px; width: 100%; text-align: center; box-shadow: 0 4px 18px rgba(10,31,68,.08); }
+  h1 { color: var(--azul); font-size: 1.25rem; font-weight: 600; margin: 0 0 12px; }
+  p { margin: 0 0 20px; line-height: 1.5; font-size: .95rem; }
+  .botoes { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  a.botao { display: inline-block; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: .9rem; }
+  a.app { background: var(--azul); color: #fff; }
+  a.web { border: 1px solid var(--azul); color: var(--azul); }
+  .oculto { display: none; }
+</style>
+</head>
+<body>
+<main class="cartao">
+  <h1 id="titulo">Abrindo o aplicativo...</h1>
+  <p id="msg">Se o Chrome perguntar, clique em <strong>Abrir</strong>. Marque "Sempre permitir" para não perguntar de novo.</p>
+  <div class="botoes">
+    <a class="botao app" id="btnApp" href="#">Abrir o aplicativo</a>
+    <a class="botao web oculto" id="btnWeb" href="#">Usar no navegador</a>
+  </div>
+</main>
+<script>
+  var apps = {
+    claude:  { nome: 'Claude',  link: 'claude://',    web: 'https://claude.ai' },
+    chatgpt: { nome: 'ChatGPT', link: 'codex://',     web: 'https://chatgpt.com' },
+    outlook: { nome: 'Outlook', link: 'fme-outlook:', web: 'https://outlook.office.com' }
+  };
+  var chave = (new URLSearchParams(location.search).get('app') || '').toLowerCase();
+  var a = apps[chave];
+  var titulo = document.getElementById('titulo'), msg = document.getElementById('msg');
+  var btnApp = document.getElementById('btnApp'), btnWeb = document.getElementById('btnWeb');
+
+  if (!a) {
+    titulo.textContent = 'Aplicativo não reconhecido';
+    msg.textContent = 'Volte para a Central FME e clique no botão de novo.';
+    btnApp.classList.add('oculto');
+  } else {
+    document.title = 'Abrindo ' + a.nome + ' - Central FME';
+    titulo.textContent = 'Abrindo o ' + a.nome + '...';
+    btnApp.href = a.link; btnApp.textContent = 'Abrir o ' + a.nome;
+    btnWeb.href = a.web;
+
+    // Quando o aplicativo abre, a janela do Chrome perde o foco: ai a aba ja pode fechar.
+    var abriu = false;
+    function fechar() {
+      if (abriu) return; abriu = true;
+      titulo.textContent = a.nome + ' aberto';
+      msg.textContent = 'Pode fechar esta aba.';
+      btnWeb.classList.remove('oculto');
+      setTimeout(function () { window.close(); }, 800);
+    }
+    window.addEventListener('blur', fechar);
+    document.addEventListener('visibilitychange', function () { if (document.hidden) fechar(); });
+
+    location.href = a.link;
+
+    // Sem resposta em 6 s: o aplicativo talvez nao esteja instalado neste PC.
+    setTimeout(function () {
+      if (abriu) return;
+      msg.textContent = 'Não abriu? O aplicativo pode não estar instalado neste computador. Você pode usar a versão no navegador.';
+      btnWeb.classList.remove('oculto');
+    }, 6000);
+  }
+</script>
+</body>
+</html>
