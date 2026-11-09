@@ -77,6 +77,8 @@
     window.addEventListener('blur', fechar);
     document.addEventListener('visibilitychange', function () { if (document.hidden) fechar(); });
     location.href = a.link;
+    // O Windows nem sempre deixa o aplicativo tirar o foco do Chrome: fecha de qualquer jeito em 1,5 s.
+    setTimeout(fechar, 1500);
 
     // Depois de 6 s mostra a versao web, para quem nao tem o aplicativo instalado.
     setTimeout(function () {
